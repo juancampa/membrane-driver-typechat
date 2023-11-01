@@ -7,7 +7,7 @@ import { createLanguageModel, createJsonTranslator } from "typechat";
 export const Root = {
   status() {
     if (!state.key) {
-      return "Please [get an OpenAI API key](https://beta.openai.com/account/api-keys) and [configure](:configure)";
+      return "Please [get an OpenAI API key](https://platform.openai.com/account/api-keys) and [configure](:configure)";
     } else {
       return `Ready`;
     }
@@ -29,9 +29,23 @@ export const Root = {
 export const Translator = {
   async translate({ prompt, ...args }, { self }) {
     const { id } = self.$argsAt(root.translator);
-    const saved = state[id] ?? {};
+    const saved = state[id] ?? { args: {} };
+
+    const model = args.model || saved.args.model;
+    if (!model) {
+      throw new Error("No model specified");
+    }
+    const schema = args.schema || saved.args.schema;
+    if (!schema) {
+      throw new Error("No schema specified");
+    }
+    const typeName = args.typeName || saved.args.typeName;
+    if (!typeName) {
+      throw new Error("No typeName specified");
+    }
+
     if (hasModelChanged(saved, args)) {
-      console.log("Model changed for ", id);
+      console.log(`Recreating ${id} model`);
       const env = {
         OPENAI_API_KEY: state.key,
         OPENAI_MODEL: args.model,
@@ -41,7 +55,7 @@ export const Translator = {
     }
 
     if (hasSchemaChanged(saved, args)) {
-      console.log("Schema changed for ", id);
+      console.log(`Recreating ${id} translator`);
       saved.translator = createJsonTranslator(
         saved.model,
         args.schema,
@@ -49,8 +63,8 @@ export const Translator = {
       );
     }
 
-    // Keep the last args to detect changes to this translator
-    saved.args = args;
+    // Keep args around so they don't need to be passed every time.
+    saved.args = { model, schema, typeName };
     state[id] = saved;
 
     const res = await saved.translator.translate(prompt);
@@ -64,14 +78,14 @@ export const Translator = {
 };
 
 function hasModelChanged(saved, args) {
-  return !saved?.model || args.model !== saved?.args?.model;
+  return !saved.model || (args.model && args.model !== saved.args.model);
 }
 
 function hasSchemaChanged(saved, args) {
   return (
-    !saved?.translator ||
-    args.schema !== saved?.args?.schema ||
-    args.typeName !== saved?.args?.typeName
+    !saved.translator ||
+    (args.schema && args.schema !== saved.args.schema) ||
+    (args.typeName && args.typeName !== saved.args.typeName)
   );
 }
 
