@@ -1,0 +1,59 @@
+{
+  "schema": {
+    "types": [
+      {
+        "name": "Root",
+        "actions": [
+          {
+            "description": "Configures the OpenAI API key.",
+            "name": "configure",
+            "type": "Void",
+            "params": [
+              {
+                "name": "key",
+                "type": "String",
+                "description": "OpenAI API key."
+              }
+            ]
+          },
+          {
+            "name": "translate",
+            "description": "Translates a prompt into a JSON value that matches the provided TypeScript schema.",
+            "type": "Json",
+            "params": [
+              {
+                "name": "model",
+                "type": "String",
+                "description": "OpenAI model to use (e.g. gpt-3.5-turbo, gpt-4)."
+              },
+              {
+                "name": "schema",
+                "type": "String",
+                "description": "A string containing the TypeScript source code for the JSON schema. The target type must be exported."
+              },
+              {
+                "name": "typeName",
+                "type": "String",
+                "description": "The name of the JSON target type in the schema."
+              },
+              {
+                "name": "prompt",
+                "type": "String",
+                "description": "The prompt to translate."
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "name": "status",
+            "type": "String"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "http": "http:"
+  }
+}

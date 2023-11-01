@@ -1,0 +1,8 @@
+{
+  "name": "membrane-driver-typechat",
+  "author": "juancampa@gmail.com",
+  "public": true,
+  "dependencies": {
+    "typechat": "0.0.10"
+  }
+}
