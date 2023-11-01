@@ -1,58 +1,77 @@
 // `nodes` contain any nodes you add from the graph (dependencies)
 // `root` is a reference to this program's root node
 // `state` is an object that persists across program updates. Store data here.
-import { state } from "membrane";
+import { root, state } from "membrane";
 import { createLanguageModel, createJsonTranslator } from "typechat";
 
-export function status() {
-  if (!state.key) {
-    return "Please [get an OpenAI API key](https://beta.openai.com/account/api-keys) and [configure](:configure)";
-  } else {
-    return `Ready`;
-  }
+export const Root = {
+  status() {
+    if (!state.key) {
+      return "Please [get an OpenAI API key](https://beta.openai.com/account/api-keys) and [configure](:configure)";
+    } else {
+      return `Ready`;
+    }
+  },
+
+  async configure({ key }) {
+    for (const id in state) {
+      delete state[id];
+    }
+    state.key = key;
+    root.statusChanged.$emit();
+  },
+
+  translator(args) {
+    return { id: args.id };
+  },
+};
+
+export const Translator = {
+  async translate({ prompt, ...args }, { self }) {
+    const { id } = self.$argsAt(root.translator);
+    const saved = state[id] ?? {};
+    if (hasModelChanged(saved, args)) {
+      console.log("Model changed for ", id);
+      const env = {
+        OPENAI_API_KEY: state.key,
+        OPENAI_MODEL: args.model,
+      };
+      saved.model = createLanguageModel(env);
+      saved.translator = null;
+    }
+
+    if (hasSchemaChanged(saved, args)) {
+      console.log("Schema changed for ", id);
+      saved.translator = createJsonTranslator(
+        saved.model,
+        args.schema,
+        args.typeName
+      );
+    }
+
+    // Keep the last args to detect changes to this translator
+    saved.args = args;
+    state[id] = saved;
+
+    const res = await saved.translator.translate(prompt);
+    if (!res.success) {
+      const msg = tip(res.message);
+      console.log(msg);
+      throw new Error(msg);
+    }
+    return res.data;
+  },
+};
+
+function hasModelChanged(saved, args) {
+  return !saved?.model || args.model !== saved?.args?.model;
 }
 
-export async function configure({ key }) {
-  state.key = key;
-  state.model = null;
-  state.translator = null;
-}
-
-export async function translate(args) {
-  if (hasModelChanged(args)) {
-    const env = {
-      OPENAI_API_KEY: state.key,
-      OPENAI_MODEL: args.model,
-    };
-    state.model = createLanguageModel(env);
-    state.translator = null;
-  }
-
-  if (hasSchemaChanged(args)) {
-    state.translator = createJsonTranslator(
-      state.model,
-      args.schema,
-      args.typeName
-    );
-  }
-
-  state.lastArgs = args;
-  const res = await state.translator.translate(args.prompt);
-  if (!res.success) {
-    throw new Error(tip(res.message));
-  }
-  return res.data;
-}
-
-function hasModelChanged(args: any) {
-  return !state.model || args.model !== state.args?.model;
-}
-
-function hasSchemaChanged(args: any) {
+function hasSchemaChanged(saved, args) {
   return (
-    !state.translator ||
-    args.schema !== state.args?.schema ||
-    args.typeName !== state.args?.typeName
+    !saved?.translator ||
+    args.schema !== saved?.args?.schema ||
+    args.typeName !== saved?.args?.typeName
   );
 }
 
