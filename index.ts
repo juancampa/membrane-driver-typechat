@@ -27,7 +27,7 @@ export const Root = {
 };
 
 export const Translator = {
-  async translate({ prompt, ...args }, { self }) {
+  async configure(args, { self }) {
     const { id } = self.$argsAt(root.translator);
     const saved = state[id] ?? { args: {} };
 
@@ -63,11 +63,17 @@ export const Translator = {
       );
     }
 
-    // Keep args around so they don't need to be passed every time.
     saved.args = { model, schema, typeName };
     state[id] = saved;
+  },
+  async translate({ prompt }, { self }) {
+    const { id } = self.$argsAt(root.translator);
+    const translator = state[id]?.translator;
+    if (!translator) {
+      throw new Error(`Translator "${id}" not yet configured`);
+    }
 
-    const res = await saved.translator.translate(prompt);
+    const res = await translator.translate(prompt);
     if (!res.success) {
       const msg = tip(res.message);
       console.log(msg);
