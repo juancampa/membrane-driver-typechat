@@ -79,6 +79,20 @@
               }
             ]
           }
+        ],
+        "fields": [
+          {
+            "name": "model",
+            "type": "String"
+          },
+          {
+            "name": "schema",
+            "type": "String"
+          },
+          {
+            "name": "typeName",
+            "type": "String"
+          }
         ]
       }
     ]

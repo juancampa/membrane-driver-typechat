@@ -22,7 +22,7 @@ export const Root = {
   },
 
   translator(args) {
-    return { id: args.id };
+    return state[args.id]?.args;
   },
 };
 
