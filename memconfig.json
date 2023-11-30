@@ -5,7 +5,7 @@
         "name": "Root",
         "actions": [
           {
-            "description": "Configures the OpenAI API key.",
+            "description": "Configures the OpenAI API key to enable communication with the OpenAI API.",
             "name": "configure",
             "type": "Void",
             "params": [
@@ -20,7 +20,8 @@
         "fields": [
           {
             "name": "status",
-            "type": "String"
+            "type": "String",
+            "description": "The current status of the program."
           },
           {
             "name": "translator",
@@ -30,15 +31,18 @@
                 "name": "id",
                 "type": "String"
               }
-            ]
+            ],
+            "description": "The translator instance used for language translation."
           }
         ],
         "events": [
           {
             "name": "statusChanged",
-            "type": "Void"
+            "type": "Void",
+            "description": "Triggered when the status of the program changes."
           }
-        ]
+        ],
+        "description": "This is the root type of the membrane-driver-typechat program."
       },
       {
         "name": "Translator",
@@ -77,21 +81,25 @@
                 "description": "The name of the JSON target type in the schema.",
                 "optional": true
               }
-            ]
+            ],
+            "description": "Configures the translator with the specified OpenAI model and JSON schema."
           }
         ],
         "fields": [
           {
             "name": "model",
-            "type": "String"
+            "type": "String",
+            "description": "The OpenAI model used for translation."
           },
           {
             "name": "schema",
-            "type": "String"
+            "type": "String",
+            "description": "The JSON schema used for translation."
           },
           {
             "name": "typeName",
-            "type": "String"
+            "type": "String",
+            "description": "The name of the JSON target type in the schema."
           }
         ]
       }
