@@ -5,7 +5,7 @@
         "name": "Root",
         "actions": [
           {
-            "description": "Configures the OpenAI API key to enable communication with the OpenAI API.",
+            "description": "Configures the OpenAI API key to enable using their models.",
             "name": "configure",
             "type": "Void",
             "params": [
@@ -32,7 +32,7 @@
                 "type": "String"
               }
             ],
-            "description": "The translator instance used for language translation."
+            "description": "A translator identified by its id."
           }
         ],
         "events": [
