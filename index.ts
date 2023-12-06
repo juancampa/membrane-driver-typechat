@@ -27,7 +27,7 @@ export const Root = {
 };
 
 export const Translator = {
-  async configure(args, { self }) {
+  async patch(args, { self }) {
     const { id } = self.$argsAt(root.translator);
     const saved = state[id] ?? { args: {} };
 
@@ -56,15 +56,15 @@ export const Translator = {
 
     if (hasSchemaChanged(saved, args)) {
       console.log(`Recreating ${id} translator`);
-      saved.translator = createJsonTranslator(
-        saved.model,
-        args.schema,
-        args.typeName
-      );
+      saved.translator = createJsonTranslator(saved.model, schema, typeName);
     }
 
     saved.args = { model, schema, typeName };
     state[id] = saved;
+  },
+  // Alias for patch for backwards compatibility
+  async configure(args, opts) {
+    return Translator.patch(args, opts);
   },
   async translate({ prompt }, { self }) {
     const { id } = self.$argsAt(root.translator);

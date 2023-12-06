@@ -60,6 +60,33 @@
             ]
           },
           {
+            "name": "patch",
+            "type": "Void",
+            "params": [
+              {
+                "name": "model",
+                "type": "String",
+                "description": "OpenAI model to use (e.g. gpt-3.5-turbo, gpt-4).",
+                "optional": true
+              },
+              {
+                "name": "schema",
+                "type": "String",
+                "description": "A string containing the TypeScript source code for the JSON schema. The target type must be exported.",
+                "optional": true
+              },
+              {
+                "name": "typeName",
+                "type": "String",
+                "description": "The name of the JSON target type in the schema.",
+                "optional": true
+              }
+            ],
+            "hints": {
+              "role": "patch"
+            }
+          },
+          {
             "name": "configure",
             "type": "Void",
             "params": [
