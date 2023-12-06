@@ -14,6 +14,12 @@ export const Root = {
   },
 
   async configure({ key }) {
+    // HACK: support setTimeout since it's not yet available in Membrane
+    (globalThis as any).setTimeout = async (callback, ms) => {
+      await sleep(ms / 1000);
+      callback();
+    };
+
     for (const id in state) {
       delete state[id];
     }
