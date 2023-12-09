@@ -1,7 +1,7 @@
 // `nodes` contain any nodes you add from the graph (dependencies)
 // `root` is a reference to this program's root node
 // `state` is an object that persists across program updates. Store data here.
-import { root, state } from "membrane";
+import { root, state, nodes } from "membrane";
 import { createLanguageModel, createJsonTranslator } from "typechat";
 
 export const Root = {
@@ -52,12 +52,28 @@ export const Translator = {
 
     if (hasModelChanged(saved, args)) {
       console.log(`Recreating ${id} model`);
-      const env = {
-        OPENAI_API_KEY: state.key,
-        OPENAI_MODEL: args.model,
-      };
-      saved.model = createLanguageModel(env);
-      saved.translator = null;
+      // Add new models by adding them as dependencies to this program. They must have a `complete` action with `prompt` as the only required argument.
+      if (nodes[model]?.complete) {
+        console.log('Using custom model "' + model + '"');
+        saved.model = {
+          complete: async (prompt: string) => {
+            try {
+              const data = await nodes[model].complete({ prompt });
+              return { success: true, data };
+            } catch (err) {
+              return { success: false, message: err.toString() };
+            }
+          },
+        };
+      } else {
+        // Use the openAI models by default
+        const env = {
+          OPENAI_API_KEY: state.key,
+          OPENAI_MODEL: args.model,
+        };
+        saved.model = createLanguageModel(env);
+        saved.translator = null;
+      }
     }
 
     if (hasSchemaChanged(saved, args)) {
