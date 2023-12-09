@@ -53,18 +53,30 @@ export const Translator = {
     if (hasModelChanged(saved, args)) {
       console.log(`Recreating ${id} model`);
       // Add new models by adding them as dependencies to this program. They must have a `complete` action with `prompt` as the only required argument.
-      if (nodes[model]?.complete) {
-        console.log('Using custom model "' + model + '"');
-        saved.model = {
-          complete: async (prompt: string) => {
-            try {
-              const data = await nodes[model].complete({ prompt });
-              return { success: true, data };
-            } catch (err) {
-              return { success: false, message: err.toString() };
-            }
-          },
-        };
+      if (args.dependencyName) {
+        const node = nodes[args.dependencyName];
+        if (!node) {
+          throw new Error(`Dependency "${args.dependencyName}" not provided`);
+        } else if (!node.complete) {
+          throw new Error(
+            `Dependency "${args.dependencyName}" does not have a complete action`
+          );
+        } else {
+          console.log(
+            `Using custom model ${model} from ${args.dependencyName}`
+          );
+          saved.model = {
+            complete: async (prompt: string) => {
+              try {
+                const data = await node.complete({ prompt, model });
+                return { success: true, data };
+              } catch (err) {
+                return { success: false, message: err.toString() };
+              }
+            },
+          };
+          saved.translator = null;
+        }
       } else {
         // Use the openAI models by default
         const env = {
@@ -81,7 +93,12 @@ export const Translator = {
       saved.translator = createJsonTranslator(saved.model, schema, typeName);
     }
 
-    saved.args = { model, schema, typeName };
+    saved.args = {
+      model,
+      schema,
+      typeName,
+      dependencyName: args.dependencyName,
+    };
     state[id] = saved;
   },
   // Alias for patch for backwards compatibility
@@ -106,7 +123,11 @@ export const Translator = {
 };
 
 function hasModelChanged(saved, args) {
-  return !saved.model || (args.model && args.model !== saved.args.model);
+  return (
+    !saved.model ||
+    (args.model && args.model !== saved.args.model) ||
+    (args.dependencyName && args.dependencyName !== saved.args.dependencyName)
+  );
 }
 
 function hasSchemaChanged(saved, args) {

@@ -80,6 +80,12 @@
                 "type": "String",
                 "description": "The name of the JSON target type in the schema.",
                 "optional": true
+              },
+              {
+                "name": "dependencyName",
+                "type": "String",
+                "description": "Name of a dependency of this program to use when using a custom model. Otherwise OpenAI will be used.",
+                "optional": true
               }
             ],
             "hints": {
@@ -106,6 +112,12 @@
                 "name": "typeName",
                 "type": "String",
                 "description": "The name of the JSON target type in the schema.",
+                "optional": true
+              },
+              {
+                "name": "dependencyName",
+                "type": "String",
+                "description": "Name of a dependency of this program to use when using a custom model. Otherwise OpenAI will be used.",
                 "optional": true
               }
             ],
