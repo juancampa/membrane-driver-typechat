@@ -42,7 +42,7 @@
             "description": "Triggered when the status of the program changes."
           }
         ],
-        "description": "This is the root type of the membrane-driver-typechat program."
+        "description": "Typechat Driver"
       },
       {
         "name": "Translator",
